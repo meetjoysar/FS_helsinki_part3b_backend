@@ -3,6 +3,7 @@ const cors = require('cors')
 
 
 const app = express()
+exports.app = app
 app.use(cors())
 
 app.use(express.static('dist'))
