@@ -1,43 +1,30 @@
 const express = require('express')
-// const cors = require('cors')
-const mongoose = require('mongoose')
+const cors = require('cors')
 
-const password = encodeURIComponent(process.argv[2])
-const url = `mongodb+srv://fullstack_hel:${password}@cluster0.sqjthj4.mongodb.net/noteApp?retryWrites=true&w=majority&appName=Cluster0`
-
-mongoose.set('strictQuery',false)
-mongoose.connect(url)
-
-const noteSchema = new mongoose.Schema({
-  content: String,
-  important: Boolean,
-})
-
-const Note = mongoose.model('Note', noteSchema)
 
 const app = express()
-// exports.app = app
-// app.use(cors())
+exports.app = app
+app.use(cors())
 
 app.use(express.static('dist'))
 
-// let notes = [
-//     {
-//         id: "1",
-//         content: "HTML is easy",
-//         important: true
-//     },
-//     {
-//         id: "2",
-//         content: "Browser can execute only JavaScript",
-//         important: false
-//     },
-//     {
-//         id: "3",
-//         content: "GET and POST are the most important methods of HTTP protocol",
-//         important: true
-//     }
-// ]
+let notes = [
+    {
+        id: "1",
+        content: "HTML is easy",
+        important: true
+    },
+    {
+        id: "2",
+        content: "Browser can execute only JavaScript",
+        important: false
+    },
+    {
+        id: "3",
+        content: "GET and POST are the most important methods of HTTP protocol",
+        important: true
+    }
+]
 
 const requestLogger = (request, response, next) => {
   console.log('Method:', request.method)
@@ -60,9 +47,7 @@ app.get('/', (req, res) => {
 })
 
 app.get('/api/notes', (req, res) => {
-    Note.find({}).then(notes => {
-        res.json(notes)
-    })
+    res.json(notes)
 })
 
 app.get('/api/notes/:id', (req, res)=>{
