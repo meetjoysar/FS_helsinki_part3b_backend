@@ -1,19 +1,29 @@
+require('dotenv').config()
 const express = require('express')
 // const cors = require('cors')
 const mongoose = require('mongoose')
+const Note = require('./models/note')
 
-const password = encodeURIComponent(process.argv[2])
-const url = `mongodb+srv://fullstack_hel:${password}@cluster0.sqjthj4.mongodb.net/noteApp?retryWrites=true&w=majority&appName=Cluster0`
+// const password = encodeURIComponent(process.argv[2])
+// const url = `mongodb+srv://fullstack_hel:${password}@cluster0.sqjthj4.mongodb.net/noteApp?retryWrites=true&w=majority&appName=Cluster0`
 
-mongoose.set('strictQuery',false)
-mongoose.connect(url)
+// mongoose.set('strictQuery',false)
+// mongoose.connect(url)
 
-const noteSchema = new mongoose.Schema({
-  content: String,
-  important: Boolean,
-})
+// const noteSchema = new mongoose.Schema({
+//   content: String,
+//   important: Boolean,
+// })
 
-const Note = mongoose.model('Note', noteSchema)
+// noteSchema.set('toJSON', {
+//     transform: (document, returnedObj) => {
+//         returnedObj.id = returnedObj._id.toString()
+//         delete returnedObj._id
+//         delete returnedObj.__v
+//     }
+// })
+
+// const Note = mongoose.model('Note', noteSchema)
 
 const app = express()
 // exports.app = app
@@ -52,12 +62,12 @@ app.use(requestLogger)
 
 
 
-app.get('/', (req, res) => {
-    /* Since the parameter is a string, Express automatically sets 
-    the value of the Content-Type header to be text/html. The status code of 
-    the response defaults to 200. */
-    res.send('<h1>Hello world</h1>')
-})
+// app.get('/', (req, res) => {
+//     /* Since the parameter is a string, Express automatically sets 
+//     the value of the Content-Type header to be text/html. The status code of 
+//     the response defaults to 200. */
+//     res.send('<h1>Hello world</h1>')
+// })
 
 app.get('/api/notes', (req, res) => {
     Note.find({}).then(notes => {
@@ -123,7 +133,7 @@ const unknownEndpoint = (request, response) => {
 app.use(unknownEndpoint)
 
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 })
