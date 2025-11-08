@@ -75,17 +75,21 @@ app.get('/api/notes', (req, res) => {
     })
 })
 
-app.get('/api/notes/:id', (req, res)=>{
-    const id = req.params.id
-    const note = notes.find(note => note.id === id)
-    /* The if-condition leverages the fact that all JavaScript objects are truthy, 
-    meaning that they evaluate to true in a comparison operation. However, undefined 
-    is falsy meaning that it will evaluate to false. */
-    if (note) {
+// app.get('/api/notes/:id', (req, res)=>{
+//     const id = req.params.id
+//     const note = notes.find(note => note.id === id)
+//     /* The if-condition leverages the fact that all JavaScript objects are truthy, 
+//     meaning that they evaluate to true in a comparison operation. However, undefined 
+//     is falsy meaning that it will evaluate to false. */
+//     if (note) {
+//         res.json(note)
+//     } else {res.status(404).end('Invalid')}
+// })
+
+app.get('/api/notes/:id', (req,res) => {
+    Note.findById(req.params.id).then(note => {
         res.json(note)
-    } else {
-        res.status(404).end('Invalid')
-    }
+    })
 })
 
 app.delete('/api/notes/:id', (req, res) => {
@@ -95,12 +99,12 @@ app.delete('/api/notes/:id', (req, res) => {
     res.status(204).end('deleted')
 })
 
-const generateId = () => {
-    const maxId = notes.length > 0
-        ? Math.max(...notes.map(n => Number(n.id)))
-        : 0
-    return String(maxId + 1)
-}
+// const generateId = () => {
+//     const maxId = notes.length > 0
+//         ? Math.max(...notes.map(n => Number(n.id)))
+//         : 0
+//     return String(maxId + 1)
+// }
 
 /* Without the json-parser, the body property would be undefined.
  The json-parser takes the JSON data of a request, transforms it into a JavaScript object
@@ -115,15 +119,22 @@ app.post('/api/notes', (req, res) => {
         })
     }
 
-    const note = {
-        content: body.content,
-        important: body.important || false,
-        id: generateId()
-    }
+    // const note = {
+    //     content: body.content,
+    //     important: body.important || false,
+    //     id: generateId()
+    // }
+    // notes= notes.concat(note)
+    // res.json(note)
 
-    notes= notes.concat(note)
-    
-    res.json(note)
+    const note = new Note({ //now updating for syncing with mongodb
+        content: body.content,
+        important: body.important || false
+    })
+
+    note.save().then(savedNote => {
+        res.json(savedNote)
+    })
 })
 
 const unknownEndpoint = (request, response) => {
