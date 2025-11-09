@@ -1,7 +1,7 @@
 require('dotenv').config()
 const express = require('express')
 // const cors = require('cors')
-const mongoose = require('mongoose')
+// const mongoose = require('mongoose')
 const Note = require('./models/note')
 
 // const password = encodeURIComponent(process.argv[2])
@@ -30,6 +30,8 @@ const app = express()
 // app.use(cors())
 
 app.use(express.static('dist'))
+app.use(express.json())
+app.use(requestLogger)
 
 // let notes = [
 //     {
@@ -53,14 +55,9 @@ const requestLogger = (request, response, next) => {
   console.log('Method:', request.method)
   console.log('Path:  ', request.path)
   console.log('Body:  ', request.body)
-  console.log('---')
+  console.log('----------------------')
   next()
 }
-
-app.use(express.json())
-app.use(requestLogger)
-
-
 
 // app.get('/', (req, res) => {
 //     /* Since the parameter is a string, Express automatically sets 
@@ -162,7 +159,8 @@ const errorHandler = (error, request, response, next) => {
 
     next(error)
 }
-app.use(errorHandler)
+
+app.use(errorHandler) //Note: to keep this line at the end of all route handlers
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
