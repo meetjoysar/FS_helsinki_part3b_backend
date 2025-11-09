@@ -86,7 +86,7 @@ app.get('/api/notes', (req, res) => {
 //     } else {res.status(404).end('Invalid')}
 // })
 
-app.get('/api/notes/:id', (req,res) => {
+app.get('/api/notes/:id', (req,res,next) => {
     Note.findById(req.params.id)
     .then(note => {
         if (note) {
