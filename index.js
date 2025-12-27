@@ -3,6 +3,7 @@ const express = require('express')
 // const cors = require('cors')
 // const mongoose = require('mongoose')
 const Note = require('./models/note')
+// const note = require('./models/note')
 
 // const password = encodeURIComponent(process.argv[2])
 // const url = `mongodb+srv://fullstack_hel:${password}@cluster0.sqjthj4.mongodb.net/noteApp?retryWrites=true&w=majority&appName=Cluster0`
@@ -31,7 +32,6 @@ const app = express()
 
 app.use(express.static('dist'))
 app.use(express.json())
-app.use(requestLogger)
 
 // let notes = [
 //     {
@@ -58,6 +58,7 @@ const requestLogger = (request, response, next) => {
   console.log('----------------------')
   next()
 }
+app.use(requestLogger)
 
 // app.get('/', (req, res) => {
 //     /* Since the parameter is a string, Express automatically sets 
@@ -101,10 +102,11 @@ app.get('/api/notes/:id', (req,res,next) => {
 })
 
 app.delete('/api/notes/:id', (req, res) => {
-    const id = req.params.id
-    notes= notes.filter(note => note.id !== id)
-
-    res.status(204).end('deleted')
+    Note.findByIdAndDelete(req.params.id)
+    .then(result => {
+        res.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
 // const generateId = () => {
@@ -117,7 +119,7 @@ app.delete('/api/notes/:id', (req, res) => {
 /* Without the json-parser, the body property would be undefined.
  The json-parser takes the JSON data of a request, transforms it into a JavaScript object
   and then attaches it to the body property of the request object before the route handler is called.*/
-app.post('/api/notes', (req, res) => {
+app.post('/api/notes', (req, res, next) => {
     const body = req.body 
     // console.log(note);
 
@@ -127,14 +129,6 @@ app.post('/api/notes', (req, res) => {
         })
     }
 
-    // const note = {
-    //     content: body.content,
-    //     important: body.important || false,
-    //     id: generateId()
-    // }
-    // notes= notes.concat(note)
-    // res.json(note)
-
     const note = new Note({ //now updating for syncing with mongodb
         content: body.content,
         important: body.important || false
@@ -143,6 +137,26 @@ app.post('/api/notes', (req, res) => {
     note.save().then(savedNote => {
         res.json(savedNote)
     })
+    .catch(err => next(err))
+})
+
+app.put('/api/notes/:id', (req, res, next) => {
+    const { content, important } = req.body
+
+    Note.findById(req.params.id)
+    .then(note => {
+        if (!note) {
+            return res.status(404).end()
+        }
+
+        note.content = content
+        note.important = important
+
+      return note.save().then((updatedNote) => {
+        res.json(updatedNote)
+      })
+    })
+    .catch(error => next(error))
 })
 
 const unknownEndpoint = (request, response) => {
@@ -155,6 +169,8 @@ const errorHandler = (error, request, response, next) => {
     
     if (error.name === 'CastError') {
         return response.status(400).send({ error: 'malformated id' })
+    } else if (error.name === 'ValidationError') {
+        return response.status(400).json({ error: error.message})
     }
 
     next(error)
